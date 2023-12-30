@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import TopBar from "./TopBar";
-import { faMicrophone, faStop } from "@fortawesome/free-solid-svg-icons";
+import { faMicrophone, faPause, faPlay, faStop, faVolumeHigh, faVolumeTimes } from "@fortawesome/free-solid-svg-icons";
 
 import axios from "axios";
 
@@ -9,6 +9,8 @@ import axios from "axios";
 import AudioFile from "../src/assets/sound.wav"
 import Select from "./component/select";
 import ToggleBtn from "./component/ToggleBtn";
+import { faSpeakap } from "@fortawesome/free-brands-svg-icons";
+import RoundedBtn from "./component/roundedBtn";
 const TranslatorApp = () => {
   const [recording, setRecording] = useState(false);
   const [audioURL, setAudioURL] = useState("");
@@ -21,9 +23,13 @@ const [translationTargetLang, setTranslationTargetLang] = useState("en");
 const [translationSourceLang, setTranslationSourcetLang] = useState("en");
 const [translatedOutput, setTranslatedOutput] = useState(); 
 const [autoTranslate, setAutoTranslate] = useState(false); 
+const [outputSpeechStatus, setOutputSpeechStatus] = useState("stopped"); 
+const [availableVoices, setAvailableVoices] = useState([]);
+const [accentVoice, setAccentVoice] = useState(() =>( localStorage.getItem('accent') || 0));
 
   const mediaRecorder = useRef(null);
   let recordedChunks = useRef([]);
+  const translationOutputElement = useRef();
   
 
 
@@ -140,7 +146,7 @@ const handleTextAreaChange = (event) =>{
   console.log(event.target.value);
 }
 useEffect(()=>{
-  (autoTranslate && TranslateTextInput)
+  // (autoTranslate && TranslateTextInput)
 },[inputMessage])
 
 function WhenSourceLanguageSelected(value){
@@ -152,32 +158,96 @@ function WhenTargetLanguageSelected(value){
 // console.log(`target ${translationTargetLang}`)
 }
 useEffect(() => {
-  console.log(`Source language updated: ${translationSourceLang}`);
+  // console.log(`Source language updated: ${translationSourceLang}`);
 }, [translationSourceLang]);
 
 useEffect(() => {
-  console.log(`Target language updated: ${translationTargetLang}`);
+  // console.log(`Target language updated: ${translationTargetLang}`);
 }, [translationTargetLang]);
 
-console.log(autoTranslate);
+// console.log(autoTranslate);
 function handleAutoTranslate(){
 
   setAutoTranslate(!autoTranslate);
 }
+
+const startSpeech = () =>{
+  
+  if (!('speechSynthesis' in window)) {
+    console.log("not supported");
+    // Browser does not support Speech Synthesis
+  
+  } else {
+    const utterance = new SpeechSynthesisUtterance(translationOutputElement.current.value);
+    utterance.voice = window.speechSynthesis.getVoices()[accentVoice];
+    speechSynthesis.speak(utterance);
+    utterance.onstart = function(event) {
+      setOutputSpeechStatus("started");
+    };
+    
+    utterance.onend = function(event) {
+      setOutputSpeechStatus("stopped");
+    };
+    
+    utterance.onerror = function(event) {
+      setOutputSpeechStatus("stopped");
+    };
+    
+    utterance.onpause = function(event) {
+      
+    };
+    
+    utterance.onresume = function(event) {
+     
+    };
+    // console.log(utterance);
+  }
+}
+const pauseSpeech = () =>{
+    // console.log(outputSpeechStatus);
+    speechSynthesis.pause();
+    setOutputSpeechStatus("paused");
+}
+const resumeSpeech = () =>{
+    // console.log(outputSpeechStatus);
+    speechSynthesis.resume();
+    setOutputSpeechStatus("resumed");
+}
+const stopSpeech = () =>{
+    // console.log(outputSpeechStatus);
+    speechSynthesis.cancel();
+    setOutputSpeechStatus("stopped");
+}
+
+useEffect(()=>{
+  const getVoices = () => {
+  // console.log(window.speechSynthesis.getVoices()[0])
+  };
+getVoices();
+},[])
+
+const chooseVoice = (event) => {
+  localStorage.setItem('accent', (event.target.value))
+  setAccentVoice(event.target.value)
+  // console.log(event.target.value);
+}
+// useEffect(()=>{
+// console.log(localStorage.getItem("accent"))
+// },[accentVoice])
   return (
     <>
       <div className="w-full h-screen">
         <TopBar />
         <div className="p-6 flex flex-col lg:flex-row gap-3">
           <div className="w-full lg:w-1/2 shadow-md p-5">
-            <h1 className="text-center m-2 text-violet-600 font-bold">Input message</h1>
+            <h1 className="text-center text-2xl m-2 text-violet-600 font-bold">Input message</h1>
             <Select WhenSelected={ (data)=>{WhenSourceLanguageSelected(data)} } value={translationSourceLang} />
             <textarea onChange={(event)=>{
               handleTextAreaChange(event)
               
             }}
             value={inputMessage}
-            className="w-full border-violet-500 border-solid border-[2px] p-4 rounded-xl" placeholder="Enter Message" name="" id="" cols="30" rows="8" />
+            className="w-full border-violet-500 border-solid border-[4px] p-4 rounded-xl" placeholder="Enter Message" name="" id="" cols="30" rows="8" />
             <div className="flex justify-center">
               <audio controls={true} src={audioURL}>
                 {/* <source src={audioURL} type="audio/wav" /> */}
@@ -195,14 +265,60 @@ function handleAutoTranslate(){
             </div>
           </div>
           <div className="w-full lg:w-1/2 shadow-md p-5">
-            <h1 className="text-center m-2 text-violet-600 font-bold">Output message</h1>
+            <h1 className="text-center text-2xl m-2 text-violet-600 font-bold">Output message</h1>
             
+           <div className="flex justify-between">
             <Select WhenSelected={ (data)=>{WhenTargetLanguageSelected(data)} } value={translationTargetLang} />
+            <select
+             onChange={(event)=>{chooseVoice(event)}}
+             value={accentVoice}
+            className="max-w-[300px]">
+              <option  value="">Accents</option>
+              {window.speechSynthesis.getVoices().map((voice, index)=>{
+                return(<option value={index} key={index}>{ `${index+1}.  ${voice.name}`}</option>);
+              })}
+            </select>
+           </div>
             {/* Add translation output here */}
-            <p>{translatedOutput}</p>
+            <textarea 
+            ref={translationOutputElement}
+            value={translatedOutput}
+            className="w-full border-violet-500 border-solid border-[4px] p-4 rounded-xl" placeholder="Translated output" readOnly={false} name="" id="" cols="30" rows="8" />
+            <div className="flex justify-center items-center">
+            <div className="flex">
+              {
+                outputSpeechStatus === "stopped" ?
+                <RoundedBtn clickedEvent={startSpeech} color={"bg-green-500"}>
+                  <FontAwesomeIcon className="dark:text-slate-800 text-white" icon={faVolumeHigh} />
+                </RoundedBtn>
+      
+                
+              :
+              <div className="flex gap-2">
+              {
+                //outputSpeechStatus === "started" || outputSpeechStatus === "paused" &&
+              <RoundedBtn clickedEvent={resumeSpeech} color={"bg-violet-500"}>
+                <FontAwesomeIcon className="dark:text-slate-800 text-white" icon={faPlay} />
+              </RoundedBtn>
+              }
+              {
+               // outputSpeechStatus === "started" || outputSpeechStatus === "resumed" &&
+              <RoundedBtn clickedEvent={pauseSpeech} color={"bg-blue-500"}>
+                <FontAwesomeIcon className="dark:text-slate-800 text-white" icon={faPause} />
+              </RoundedBtn>
+              }
+              <RoundedBtn clickedEvent={stopSpeech} color={"bg-red-500"}>
+                <FontAwesomeIcon className="dark:text-slate-800 text-white" icon={faStop} />
+              </RoundedBtn>
+              </div>
+            }
+
+            </div>
+            </div>
+            
           </div>
         </div>
-        <div className="flex flex-col lg:flex-row items-center justify-center">
+        <div className="flex flex-col lg:flex-row items-center lg:justify-evenly">
           {/* Add translation logic and handler */}
           <input type="file" name="main-file" id="" onChange={ async (event)=>{
            await setMainFile(event.target.files[0])
