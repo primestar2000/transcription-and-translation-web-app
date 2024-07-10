@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import TopBar from "./TopBar";
-import { faMicrophone, faPause, faPlay, faStop, faVolumeHigh, faVolumeTimes } from "@fortawesome/free-solid-svg-icons";
+import { faMicrophone, faPause, faPlay, faStop, faVolumeHigh, faVolumeTimes, faSpinner } from "@fortawesome/free-solid-svg-icons";
 
 import axios from "axios";
 
@@ -12,12 +12,13 @@ import ToggleBtn from "./component/ToggleBtn";
 import { faSpeakap } from "@fortawesome/free-brands-svg-icons";
 import RoundedBtn from "./component/roundedBtn";
 const TranslatorApp = () => {
-  const [recording, setRecording] = useState(false);
-  const [audioURL, setAudioURL] = useState("");
-  const [mainFile, setMainFile] = useState(null);
-  const [sendMessage, setSendMessage] = useState(false);
-  const [transcriptionComponentHasMount, setTranscriptionComponentHasMount] = useState(false);
+const [recording, setRecording] = useState(false);
+const [audioURL, setAudioURL] = useState("");
+const [mainFile, setMainFile] = useState(null);
+const [sendMessage, setSendMessage] = useState(false);
+const [transcriptionComponentHasMount, setTranscriptionComponentHasMount] = useState(false);
 const [wishperResponse, setWhisperResponse] = useState(); 
+const [loading, setLoading] = useState(false); 
 const [inputMessage, setInputMessage] = useState(); 
 const [translationTargetLang, setTranslationTargetLang] = useState("en");
 const [translationSourceLang, setTranslationSourcetLang] = useState("en");
@@ -64,10 +65,10 @@ const [accentVoice, setAccentVoice] = useState(() =>( localStorage.getItem('acce
     if (mediaRecorder.current && recording) {
       mediaRecorder.current.stop();
       setRecording(false);
-
     recordedChunks.current=[];
     }
   }
+
 
 
 //   transcbribe function
@@ -78,7 +79,6 @@ async function TranscribeAudio(){
     const file = AudioFile;
     formData.append("model", model);
     formData.append("file", mainFile);
-    // formData.append("language", language);
     const  config  = {
         headers: {
           "Content-Type": `multipart/form-data`,
@@ -114,10 +114,14 @@ async function TranslateTextInput (){
   
   try {
     const response = await axios.request(options);
+    if (response) {
+      setLoading(false);
+    }
     console.log(response.data.data.translations[0].translatedText);
     setTranslatedOutput(response.data.data.translations[0].translatedText);
   } catch (error) {
     console.error(error);
+    setLoading(false);
   }
 }
 
@@ -227,13 +231,19 @@ getVoices();
 },[])
 
 const chooseVoice = (event) => {
-  localStorage.setItem('accent', (event.target.value))
-  setAccentVoice(event.target.value)
+  localStorage.setItem('accent', (event.target.value));
+  setAccentVoice(event.target.value);
   // console.log(event.target.value);
 }
 // useEffect(()=>{
 // console.log(localStorage.getItem("accent"))
 // },[accentVoice])
+
+ const uploadFile = (event) =>{
+    setMainFile(event.target.files[0]);
+    
+   
+}
   return (
     <>
       <div className="w-full h-screen">
@@ -320,12 +330,16 @@ const chooseVoice = (event) => {
         </div>
         <div className="flex flex-col lg:flex-row items-center lg:justify-evenly">
           {/* Add translation logic and handler */}
-          <input type="file" name="main-file" id="" onChange={ async (event)=>{
-           await setMainFile(event.target.files[0])
-            console.log(mainFile)
-          }} />
-          <button className="bg-violet-500 text-white p-3 rounded-lg" onClick={() => {setSendMessage(!sendMessage)}}>
+          <input type="file" name="main-file" id="" onChange={uploadFile} />
+          <button className="bg-violet-500 flex gap-4 text-white p-3 rounded-lg" onClick={() => {setSendMessage(!sendMessage); setLoading(true);}}>
             Translate
+
+            <span className="w-6 h-6  rounded-full block">
+              {
+              loading && 
+               <FontAwesomeIcon icon={faSpinner}  className="text-[20px] rotate-90 animate-spin ease-in-out" />
+              }
+            </span>
           </button>
           
           <ToggleBtn handleExtClick={()=>handleAutoTranslate()} status={autoTranslate} />
