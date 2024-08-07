@@ -58,7 +58,7 @@ const SignUpPage = () => {
                         <h1 className="text-center text-[30px] font-[cursive]">Create Account</h1>
                         <h2 className="text-violet-500 text-xl text-center">Welcome,<span className="text-slate-600"> Please Enter Credentials</span></h2>
                         <div className={`${email.length > 10 && email.includes("@") ? "border-green-500" :"border-slate-500"} border-[2px] border-solid p-2 px-4 rounded-3xl flex items-center`}>
-                            <input className="w-full h-6 text-slate-700 bg-transparent border-none outline-none bg-transparent" placeholder="Email" type="text" name="" id="" onChange={(text)=>{setEmail(text.target.value)}}/>
+                            <input className="w-full h-6 text-slate-700  border-none outline-none bg-transparent" placeholder="Email" type="text" name="" id="" onChange={(text)=>{setEmail(text.target.value)}}/>
                             <FontAwesomeIcon icon={faUser} className="text-slate-400"/>
                         </div>
                         <div className={`${password.length > 5 ? "border-green-500" :"border-slate-500"} border-[2px] border-solid p-2 px-4 rounded-3xl flex items-center`}>
