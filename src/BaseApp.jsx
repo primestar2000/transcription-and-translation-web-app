@@ -112,7 +112,7 @@ async function TranscribeViaAssemblyAI (){
   const baseUrl = 'https://api.assemblyai.com/v2'
 
   const headers = {
-    authorization: '6bf160df80894c029d0f545a2323d3c0'
+    authorization: import.meta.env.VITE_ASSEMBLYAI_API_KEY,
   }
   const uploadResponse = await axios.post(`${baseUrl}/upload`, mainFile, {
     headers
@@ -126,7 +126,7 @@ async function TranscribeViaAssemblyAI (){
   }
   
   const client = new AssemblyAI({
-    apiKey: '6bf160df80894c029d0f545a2323d3c0',
+    apiKey: import.meta.env.VITE_ASSEMBLYAI_API_KEY,
   });
   const transcript = await client.transcripts.transcribe(data);
   if(transcript){
@@ -292,18 +292,18 @@ const chooseVoice = (event) => {
 }
   return (
     <>
-      <div className="w-full h-screen dark:bg-slate-900">
+      <div className="w-full py-2 lg:screen dark:bg-slate-900">
         <TopBar />
         <div className="p-6 flex flex-col lg:flex-row gap-3">
           <div className="w-full lg:w-1/2 dark:bg-slate-800 rounded-2xl  shadow-md p-5">
             <h1 className="text-center text-2xl m-2 text-violet-600 font-bold">Input message</h1>
             <Select WhenSelected={ (data)=>{WhenSourceLanguageSelected(data)} } value={translationSourceLang} />
-            <div className="relative">
+            <div className="relative mb-2">
               {
                 transcribing && (
-                  <div className="w-full h-full bg-[#111111ca] absolute flex justify-center items-center flex-col gap-10">
+                  <div className="w-full h-full bg-[#111111ca] absolute flex justify-center items-center flex-col gap-2">
                     <FontAwesomeIcon icon={faSpinner} className="text-[30px] rotate-90 animate-spin ease-in-out" />
-                    <h1 className="font-bold text-2xl">Transcription in Progress</h1>
+                    <h1 className="font-bold text-xl">Transcription in Progress</h1>
                   </div>
                 )
               }
@@ -312,10 +312,10 @@ const chooseVoice = (event) => {
                 
               }}
               value={inputMessage}
-              className="w-full border-violet-500 border-solid border-[4px] p-4 rounded-xl" placeholder="Enter Message" name="" id="" cols="30" rows="8" />
+              className="w-full h-[100px] border-violet-500 border-solid border-[4px] p-4 rounded-xl" placeholder="Enter Message" name="" id="" cols="30" rows="8" />
             </div>
-            <div className="flex justify-center">
-              <audio controls={true} src={audioURL}>
+            <div className="flex justify-center gap-2 ">
+              <audio className="h-12 flex-1" controls={true} src={audioURL}>
                 {/* <source src={audioURL} type="audio/wav" /> */}
                 Your browser does not support the audio element.
               </audio>
@@ -333,7 +333,7 @@ const chooseVoice = (event) => {
           <div className="w-full lg:w-1/2 dark:bg-slate-800 rounded-2xl shadow-md p-5">
             <h1 className="text-center text-2xl m-2 text-violet-600 font-bold">Output message</h1>
             
-            <div className="flex  flex-col lg:flex-row justify-between">
+            <div className="flex gap-4  flex-col lg:flex-row justify-between">
               <Select WhenSelected={ (data)=>{WhenTargetLanguageSelected(data)} } value={translationTargetLang} />
               <select
               onChange={(event)=>{chooseVoice(event)}}
@@ -349,7 +349,7 @@ const chooseVoice = (event) => {
             <textarea 
             ref={translationOutputElement}
             value={translatedOutput}
-            className="w-full border-violet-500 border-solid border-[4px] p-4 rounded-xl" placeholder="Translated output" readOnly={false} name="" id="" cols="30" rows="8" />
+            className="w-full h-[100px] border-violet-500 border-solid border-[4px] p-4 rounded-xl" placeholder="Translated output" readOnly={false} name="" id="" cols="30" rows="8" />
             <div className="flex justify-center items-center">
             <div className="flex">
               {
@@ -386,7 +386,7 @@ const chooseVoice = (event) => {
         </div>
         <div className="flex flex-col lg:flex-row items-center lg:justify-evenly">
           {/* Add translation logic and handler */}
-          <input type="file" name="main-file" id="" onChange={uploadFile} />
+          {/* <input type="file" name="main-file" id="" onChange={uploadFile} /> */}
           <button className="bg-violet-500 flex gap-4 text-white p-3 rounded-lg" onClick={() => {setSendMessage(!sendMessage); setLoading(true);}}>
             Translate
             <span className="w-6 h-6  rounded-full block">
@@ -400,7 +400,7 @@ const chooseVoice = (event) => {
             </span>
           </button>
           
-          <ToggleBtn handleExtClick={()=>handleAutoTranslate()} status={autoTranslate} />
+          {/* <ToggleBtn handleExtClick={()=>handleAutoTranslate()} status={autoTranslate} /> */}
         </div>
         
       </div>

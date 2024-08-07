@@ -49,7 +49,7 @@ const SignUpPage = () => {
                         <Loader />
                     )
                 }
-                <div className="w-full  h-full lg:h-fit max-w-[800px] flex justify-center gap-2 bg-slate-200 lg:rounded-3xl p-10 shadow-md">
+                <div className="w-full  h-full lg:h-fit max-w-[800px] flex justify-center gap-2 bg-slate-200 lg:rounded-3xl p-6 shadow-md">
                     <div className="w-1/2 hidden md:flex justify-center items-center ">
                         <img src={illustration} alt="illustrator" />
                     </div>
@@ -58,23 +58,23 @@ const SignUpPage = () => {
                         <h1 className="text-center text-[30px] font-[cursive]">Create Account</h1>
                         <h2 className="text-violet-500 text-xl text-center">Welcome,<span className="text-slate-600"> Please Enter Credentials</span></h2>
                         <div className={`${email.length > 10 && email.includes("@") ? "border-green-500" :"border-slate-500"} border-[2px] border-solid p-2 px-4 rounded-3xl flex items-center`}>
-                            <input className="w-full h-6 border-none outline-none bg-transparent" placeholder="Email" type="text" name="" id="" onChange={(text)=>{setEmail(text.target.value)}}/>
+                            <input className="w-full h-6 text-slate-700 bg-transparent border-none outline-none bg-transparent" placeholder="Email" type="text" name="" id="" onChange={(text)=>{setEmail(text.target.value)}}/>
                             <FontAwesomeIcon icon={faUser} className="text-slate-400"/>
                         </div>
                         <div className={`${password.length > 5 ? "border-green-500" :"border-slate-500"} border-[2px] border-solid p-2 px-4 rounded-3xl flex items-center`}>
-                            <input className="w-full h-6 border-none outline-none bg-transparent" placeholder="Password" type="password" name="" id="" onChange={(text)=>{setPassword(text.target.value)}} />
+                            <input className="w-full h-6 text-slate-700 border-none outline-none bg-transparent" placeholder="Password" type="password" name="" id="" onChange={(text)=>{setPassword(text.target.value)}} />
                             <FontAwesomeIcon icon={faLock} className="text-slate-400"/>
                         </div>
                         <div className={`${passwordMatch ? "border-green-500" :"border-slate-500"} border-[2px] border-solid p-2 px-4 rounded-3xl flex items-center`}>
-                            <input className="w-full h-6 border-none outline-none bg-transparent" placeholder="Repeat Password" type="password" name="" id="" onChange={(text)=>{setConfirmPassword(text.target.value)}} />
+                            <input className="w-full h-6 text-slate-700 border-none outline-none bg-transparent" placeholder="Repeat Password" type="password" name="" id="" onChange={(text)=>{setConfirmPassword(text.target.value)}} />
                             <FontAwesomeIcon icon={faLock} className="text-slate-400"/>
                         </div>
                         <button onClick={()=>{SignUpWithEmail();}} className="h-10 bg-violet-500 rounded-3xl text-white">Submit</button>
                         <h1 className="text-center">OR</h1>
                         <div>
-                            <button onClick={()=>{SignUpWithGmail()}}>
+                            {/* <button onClick={()=>{SignUpWithGmail()}}>
                                 <FontAwesomeIcon icon={faGoogle} className="text-red-400"/>
-                            </button>
+                            </button> */}
                         </div>
                         <div className="w-full h-10 bg-orange-2 text-black border-[2px] border-solid p-2 px-4 rounded-3xl flex gap-4 items-center justify-center">
                             <p>Already have Account ? </p>
