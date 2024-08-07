@@ -6,11 +6,13 @@ import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { Outlet, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { app, firebaseConfig } from "../../firebase";
+import Loader from "../component/Loader";
 const SignUpPage = () => {
  const [email, setEmail] = useState("");
  const [password, setPassword] = useState("");
  const [confirmPassword, setConfirmPassword] = useState("");  
  const [passwordMatch, setPasswordMatch] = useState(false);
+ const [loading, setLoading] = useState(false);
  useEffect(()=>{
    
 
@@ -22,12 +24,15 @@ const SignUpPage = () => {
     
     console.log(firebaseConfig);
  },[password, confirmPassword])
-    function SignUpWithGmail(){
+    function SignUpWithEmail(){
+        setLoading(true);
         const auth = getAuth(app)
         createUserWithEmailAndPassword(auth, email, password).then((result)=>{
             console.log(result);
         }).catch((error)=>{
             console.log(error);
+        }).finally(()=>{
+            setLoading(false);
         })
     }
 
@@ -39,12 +44,17 @@ const SignUpPage = () => {
             </div>}
 
             <div className="h-screen w-[full]  flex justify-center items-center">
-                <div className="w-full h-full lg:h-fit max-w-[800px] flex justify-center gap-4 bg-slate-200 lg:rounded-3xl p-10 shadow-md">
+                {
+                    loading && (
+                        <Loader />
+                    )
+                }
+                <div className="w-full  h-full lg:h-fit max-w-[800px] flex justify-center gap-2 bg-slate-200 lg:rounded-3xl p-10 shadow-md">
                     <div className="w-1/2 hidden md:flex justify-center items-center ">
                         <img src={illustration} alt="illustrator" />
                     </div>
                     <div className="w-[5px] hidden md:flex h-[400px] bg-slate-300"></div>
-                    <div className="w-full lg:w-1/2 lg:p-8 flex flex-col gap-5">
+                    <div className="w-full lg:w-1/2 lg:p-4 flex flex-col gap-2">
                         <h1 className="text-center text-[30px] font-[cursive]">Create Account</h1>
                         <h2 className="text-violet-500 text-xl text-center">Welcome,<span className="text-slate-600"> Please Enter Credentials</span></h2>
                         <div className={`${email.length > 10 && email.includes("@") ? "border-green-500" :"border-slate-500"} border-[2px] border-solid p-2 px-4 rounded-3xl flex items-center`}>
@@ -59,7 +69,7 @@ const SignUpPage = () => {
                             <input className="w-full h-6 border-none outline-none bg-transparent" placeholder="Repeat Password" type="password" name="" id="" onChange={(text)=>{setConfirmPassword(text.target.value)}} />
                             <FontAwesomeIcon icon={faLock} className="text-slate-400"/>
                         </div>
-                        <button className="h-10 bg-violet-500 rounded-3xl text-white">Submit</button>
+                        <button onClick={()=>{SignUpWithEmail();}} className="h-10 bg-violet-500 rounded-3xl text-white">Submit</button>
                         <h1 className="text-center">OR</h1>
                         <div>
                             <button onClick={()=>{SignUpWithGmail()}}>

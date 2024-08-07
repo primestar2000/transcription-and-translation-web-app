@@ -7,7 +7,7 @@ const Select = ({WhenSelected, value}) => {
 return(
     <>
         <div>
-            <select className="my-4 text-blue-600 border-[2px] border-solid border-violet-600" onChange={()=>{handleChange(event)}} value={value}> 
+            <select className="my-4 text-blue-600 p-2 border-[2px] border-solid border-violet-600" onChange={()=>{handleChange(event)}} value={value}> 
                 <option >select</option>
                 {languagesData.data.languages.map((data)=>{
                 return ( <option key={data.language} value={data.language}>{data.description}</option>)

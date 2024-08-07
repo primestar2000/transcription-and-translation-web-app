@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import TopBar from "./TopBar";
-import { faMicrophone, faPause, faPlay, faStop, faVolumeHigh, faVolumeTimes, faSpinner } from "@fortawesome/free-solid-svg-icons";
-
+import { faMicrophone, faPause, faPlay, faStop, faVolumeHigh, faVolumeTimes, faSpinner, faLanguage } from "@fortawesome/free-solid-svg-icons";
+import { AssemblyAI } from 'assemblyai';
 import axios from "axios";
 
 
@@ -11,6 +11,8 @@ import Select from "./component/select";
 import ToggleBtn from "./component/ToggleBtn";
 import { faSpeakap } from "@fortawesome/free-brands-svg-icons";
 import RoundedBtn from "./component/roundedBtn";
+
+
 const TranslatorApp = () => {
 const [recording, setRecording] = useState(false);
 const [audioURL, setAudioURL] = useState("");
@@ -19,6 +21,7 @@ const [sendMessage, setSendMessage] = useState(false);
 const [transcriptionComponentHasMount, setTranscriptionComponentHasMount] = useState(false);
 const [wishperResponse, setWhisperResponse] = useState(); 
 const [loading, setLoading] = useState(false); 
+const [transcribing, setTranscribing] = useState(false); 
 const [inputMessage, setInputMessage] = useState(); 
 const [translationTargetLang, setTranslationTargetLang] = useState("en");
 const [translationSourceLang, setTranslationSourcetLang] = useState("en");
@@ -52,6 +55,15 @@ const [accentVoice, setAccentVoice] = useState(() =>( localStorage.getItem('acce
         const url = URL.createObjectURL(blob);
         setMainFile(newFile);
         setAudioURL(url);
+
+        const reader = new FileReader();
+        reader.onload = function() {
+          const arrayBuffer = this.result;
+          // You can now process the binary data, send it to a server, etc.
+          console.log(arrayBuffer);
+        };
+        reader.readAsArrayBuffer(blob);
+        
       };
 
       mediaRecorder.current.start();
@@ -95,6 +107,37 @@ async function TranscribeAudio(){
       
 }
 
+async function TranscribeViaAssemblyAI (){
+  
+  const baseUrl = 'https://api.assemblyai.com/v2'
+
+  const headers = {
+    authorization: '6bf160df80894c029d0f545a2323d3c0'
+  }
+  const uploadResponse = await axios.post(`${baseUrl}/upload`, mainFile, {
+    headers
+  });
+ const uploadUrl = uploadResponse.data.upload_url
+ // const uploadUrl = "https://github.com/AssemblyAI-Community/audio-examples/raw/main/20230607_me_canadian_wildfires.mp3"
+ 
+ 
+ const data = {
+    audio_url: uploadUrl // You can also use a URL to an audio or video file on the web
+  }
+  
+  const client = new AssemblyAI({
+    apiKey: '6bf160df80894c029d0f545a2323d3c0',
+  });
+  const transcript = await client.transcripts.transcribe(data);
+  if(transcript){
+    setTranscribing(false);
+  } 
+  setInputMessage(transcript.text);
+  console.log(transcript.text);
+
+  
+}
+
 async function TranslateTextInput (){
   const encodedParams = new URLSearchParams();
   encodedParams.set('q', inputMessage);
@@ -127,10 +170,13 @@ async function TranslateTextInput (){
 
 useEffect(()=>{
     if(transcriptionComponentHasMount){
-      TranscribeAudio();
+      // TranscribeAudio();
+      TranscribeViaAssemblyAI();
+      setTranscribing(true);
       // setInputMessage(event.target.value);
     }
     setTranscriptionComponentHasMount(true);
+   // console.log("here is the audio link: ", audioURL.replace("blob:", "").trim())
 },[mainFile])
 
 useEffect(()=>{
@@ -246,18 +292,28 @@ const chooseVoice = (event) => {
 }
   return (
     <>
-      <div className="w-full h-screen">
+      <div className="w-full h-screen dark:bg-slate-900">
         <TopBar />
         <div className="p-6 flex flex-col lg:flex-row gap-3">
-          <div className="w-full lg:w-1/2 shadow-md p-5">
+          <div className="w-full lg:w-1/2 dark:bg-slate-800 rounded-2xl  shadow-md p-5">
             <h1 className="text-center text-2xl m-2 text-violet-600 font-bold">Input message</h1>
             <Select WhenSelected={ (data)=>{WhenSourceLanguageSelected(data)} } value={translationSourceLang} />
-            <textarea onChange={(event)=>{
-              handleTextAreaChange(event)
-              
-            }}
-            value={inputMessage}
-            className="w-full border-violet-500 border-solid border-[4px] p-4 rounded-xl" placeholder="Enter Message" name="" id="" cols="30" rows="8" />
+            <div className="relative">
+              {
+                transcribing && (
+                  <div className="w-full h-full bg-[#111111ca] absolute flex justify-center items-center flex-col gap-10">
+                    <FontAwesomeIcon icon={faSpinner} className="text-[30px] rotate-90 animate-spin ease-in-out" />
+                    <h1 className="font-bold text-2xl">Transcription in Progress</h1>
+                  </div>
+                )
+              }
+              <textarea onChange={(event)=>{
+                handleTextAreaChange(event)
+                
+              }}
+              value={inputMessage}
+              className="w-full border-violet-500 border-solid border-[4px] p-4 rounded-xl" placeholder="Enter Message" name="" id="" cols="30" rows="8" />
+            </div>
             <div className="flex justify-center">
               <audio controls={true} src={audioURL}>
                 {/* <source src={audioURL} type="audio/wav" /> */}
@@ -274,21 +330,21 @@ const chooseVoice = (event) => {
               )}
             </div>
           </div>
-          <div className="w-full lg:w-1/2 shadow-md p-5">
+          <div className="w-full lg:w-1/2 dark:bg-slate-800 rounded-2xl shadow-md p-5">
             <h1 className="text-center text-2xl m-2 text-violet-600 font-bold">Output message</h1>
             
-           <div className="flex justify-between">
-            <Select WhenSelected={ (data)=>{WhenTargetLanguageSelected(data)} } value={translationTargetLang} />
-            <select
-             onChange={(event)=>{chooseVoice(event)}}
-             value={accentVoice}
-            className="max-w-[300px]">
-              <option  value="">Accents</option>
-              {window.speechSynthesis.getVoices().map((voice, index)=>{
-                return(<option value={index} key={index}>{ `${index+1}.  ${voice.name}`}</option>);
-              })}
-            </select>
-           </div>
+            <div className="flex  flex-col lg:flex-row justify-between">
+              <Select WhenSelected={ (data)=>{WhenTargetLanguageSelected(data)} } value={translationTargetLang} />
+              <select
+              onChange={(event)=>{chooseVoice(event)}}
+              value={accentVoice}
+              className="flex-1 lg:w-[200px] p-2 my-2">
+                <option  value="">Accents</option>
+                {window.speechSynthesis.getVoices().map((voice, index)=>{
+                  return(<option value={index} key={index}>{ `${index+1}.  ${voice.name}`}</option>);
+                })}
+              </select>
+            </div>
             {/* Add translation output here */}
             <textarea 
             ref={translationOutputElement}
@@ -333,17 +389,20 @@ const chooseVoice = (event) => {
           <input type="file" name="main-file" id="" onChange={uploadFile} />
           <button className="bg-violet-500 flex gap-4 text-white p-3 rounded-lg" onClick={() => {setSendMessage(!sendMessage); setLoading(true);}}>
             Translate
-
             <span className="w-6 h-6  rounded-full block">
               {
-              loading && 
+              loading ? 
                <FontAwesomeIcon icon={faSpinner}  className="text-[20px] rotate-90 animate-spin ease-in-out" />
+               :
+               <FontAwesomeIcon icon={faLanguage}  className="text-[20px] " />
+              
               }
             </span>
           </button>
           
           <ToggleBtn handleExtClick={()=>handleAutoTranslate()} status={autoTranslate} />
         </div>
+        
       </div>
     </>
   );
