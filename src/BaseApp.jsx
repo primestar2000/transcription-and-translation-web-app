@@ -322,7 +322,7 @@ const chooseVoice = (event) => {
                 
               }}
               value={inputMessage}
-              className="w-full h-[100px] lg:h-[300px] border-violet-500 border-solid border-[4px] p-4 rounded-xl" placeholder="Enter Message" name="" id="" cols="30" rows="8" />
+              className="w-full h-[100px] lg:h-[200px] border-violet-500 border-solid border-[4px] p-4 rounded-xl" placeholder="Enter Message" name="" id="" cols="30" rows="8" />
             </div>
             <div className="flex justify-center gap-2 ">
               <audio className="h-12 flex-1" controls={true} src={audioURL}>
@@ -359,7 +359,7 @@ const chooseVoice = (event) => {
             <textarea 
             ref={translationOutputElement}
             value={translatedOutput}
-            className="w-full h-[100px] lg:h-[300px] border-violet-500 border-solid border-[4px] p-4 rounded-xl" placeholder="Translated output" readOnly={false} name="" id="" cols="30" rows="8" />
+            className="w-full h-[100px] lg:h-[200px] border-violet-500 border-solid border-[4px] p-4 rounded-xl" placeholder="Translated output" readOnly={false} name="" id="" cols="30" rows="8" />
             <div className="flex justify-center items-center">
             <div className="flex">
               {
@@ -410,6 +410,7 @@ const chooseVoice = (event) => {
             </span>
           </button>
           <p className="text-xl text-red-600">{errorMessage}</p>
+          <p className="text-xl text-red-600">{`${import.meta.env.VITE_RAPID_API_KEY}`}</p>
           {/* <ToggleBtn handleExtClick={()=>handleAutoTranslate()} status={autoTranslate} /> */}
         </div>
         
