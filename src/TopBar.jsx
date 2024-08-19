@@ -30,7 +30,7 @@ const TopBar = () => {
         )
     }
     <div className="w-full h-[56px] flex items-center px-6 shadow-md justify-between">
-        <h1 className="lg:text-3xl text-xl font-[impact] font-extrabold">M.D - Translator</h1>
+        <h1 className="lg:text-3xl text-xl font-[impact] font-extrabold">Ameh Monday - Translator</h1>
         <button onClick={()=>{setShowMenu(true)}}>
             <FontAwesomeIcon  icon={faBars} className="text-[20px]" />
         </button>

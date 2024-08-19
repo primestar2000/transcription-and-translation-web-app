@@ -28,8 +28,10 @@ const [translationSourceLang, setTranslationSourcetLang] = useState("en");
 const [translatedOutput, setTranslatedOutput] = useState(); 
 const [autoTranslate, setAutoTranslate] = useState(false); 
 const [outputSpeechStatus, setOutputSpeechStatus] = useState("stopped"); 
+const [errorMessage, setErrormessage] = useState(); 
 const [availableVoices, setAvailableVoices] = useState([]);
 const [accentVoice, setAccentVoice] = useState(() =>( localStorage.getItem('accent') || 0));
+const [translationKey, setTranslationKey] = useState(`${import.meta.env.VITE_RAPID_API_KEY}`); 
 
   const mediaRecorder = useRef(null);
   let recordedChunks = useRef([]);
@@ -122,7 +124,8 @@ async function TranscribeViaAssemblyAI (){
  
  
  const data = {
-    audio_url: uploadUrl // You can also use a URL to an audio or video file on the web
+    audio_url: uploadUrl,
+    language_detection: true
   }
   
   const client = new AssemblyAI({
@@ -149,7 +152,8 @@ async function TranslateTextInput (){
     url: 'https://google-translate1.p.rapidapi.com/language/translate/v2',
     headers: {
       'content-type': 'application/x-www-form-urlencoded',
-      'X-RapidAPI-Key': `${import.meta.env.VITE_RAPID_API_KEY}`,
+      'X-RapidAPI-Key': translationKey,
+      // 'X-RapidAPI-Key': `${import.meta.env.VITE_RAPID_API_KEY}`,
       'X-RapidAPI-Host': 'google-translate1.p.rapidapi.com'
     },
     data: encodedParams,
@@ -163,7 +167,13 @@ async function TranslateTextInput (){
     console.log(response.data.data.translations[0].translatedText);
     setTranslatedOutput(response.data.data.translations[0].translatedText);
   } catch (error) {
-    console.error(error);
+    console.log('this is the error',error.code)
+    setErrormessage(error.message);
+    // if(error.code == 'ERR_BAD_REQUEST'){
+    //   await setTranslationKey(`${import.meta.env.VITE_RAPID_API_KEY_SECOND}`);
+    // TranslateTextInput();
+    // }
+    // console.error(error.status);
     setLoading(false);
   }
 }
@@ -312,7 +322,7 @@ const chooseVoice = (event) => {
                 
               }}
               value={inputMessage}
-              className="w-full h-[100px] border-violet-500 border-solid border-[4px] p-4 rounded-xl" placeholder="Enter Message" name="" id="" cols="30" rows="8" />
+              className="w-full h-[100px] lg:h-[300px] border-violet-500 border-solid border-[4px] p-4 rounded-xl" placeholder="Enter Message" name="" id="" cols="30" rows="8" />
             </div>
             <div className="flex justify-center gap-2 ">
               <audio className="h-12 flex-1" controls={true} src={audioURL}>
@@ -338,7 +348,7 @@ const chooseVoice = (event) => {
               <select
               onChange={(event)=>{chooseVoice(event)}}
               value={accentVoice}
-              className="flex-1 lg:w-[200px] p-2 my-2">
+              className="flex-1 lg:w-[200px] p-1 my-2">
                 <option  value="">Accents</option>
                 {window.speechSynthesis.getVoices().map((voice, index)=>{
                   return(<option value={index} key={index}>{ `${index+1}.  ${voice.name}`}</option>);
@@ -349,7 +359,7 @@ const chooseVoice = (event) => {
             <textarea 
             ref={translationOutputElement}
             value={translatedOutput}
-            className="w-full h-[100px] border-violet-500 border-solid border-[4px] p-4 rounded-xl" placeholder="Translated output" readOnly={false} name="" id="" cols="30" rows="8" />
+            className="w-full h-[100px] lg:h-[300px] border-violet-500 border-solid border-[4px] p-4 rounded-xl" placeholder="Translated output" readOnly={false} name="" id="" cols="30" rows="8" />
             <div className="flex justify-center items-center">
             <div className="flex">
               {
@@ -384,7 +394,7 @@ const chooseVoice = (event) => {
             
           </div>
         </div>
-        <div className="flex flex-col lg:flex-row items-center lg:justify-evenly">
+        <div className="flex flex-col  items-center lg:justify-evenly">
           {/* Add translation logic and handler */}
           {/* <input type="file" name="main-file" id="" onChange={uploadFile} /> */}
           <button className="bg-violet-500 flex gap-4 text-white p-3 rounded-lg" onClick={() => {setSendMessage(!sendMessage); setLoading(true);}}>
@@ -399,7 +409,7 @@ const chooseVoice = (event) => {
               }
             </span>
           </button>
-          
+          <p className="text-xl text-red-600">{errorMessage}</p>
           {/* <ToggleBtn handleExtClick={()=>handleAutoTranslate()} status={autoTranslate} /> */}
         </div>
         
