@@ -152,7 +152,8 @@ async function TranslateTextInput (){
     url: 'https://google-translate1.p.rapidapi.com/language/translate/v2',
     headers: {
       'content-type': 'application/x-www-form-urlencoded',
-      'X-RapidAPI-Key': translationKey,
+      // 'X-RapidAPI-Key': translationKey,
+      'X-RapidAPI-Key': `7ff6d91e22mshdad67cf1bdf00f3p1c203fjsn10ed3cb56794`,
       // 'X-RapidAPI-Key': `${import.meta.env.VITE_RAPID_API_KEY}`,
       'X-RapidAPI-Host': 'google-translate1.p.rapidapi.com'
     },
