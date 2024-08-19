@@ -410,7 +410,7 @@ const chooseVoice = (event) => {
             </span>
           </button>
           <p className="text-xl text-red-600">{errorMessage}</p>
-          <p className="text-xl text-red-600">{`${import.meta.env.VITE_RAPID_API_KEY}`}</p>
+          {/* <p className="text-xl text-red-600">{`${import.meta.env.VITE_RAPID_API_KEY}`}</p> */}
           {/* <ToggleBtn handleExtClick={()=>handleAutoTranslate()} status={autoTranslate} /> */}
         </div>
         
